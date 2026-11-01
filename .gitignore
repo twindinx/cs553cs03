@@ -1,0 +1,41 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Python Cache & Build
+__pycache__/
+*.py[cod]
+*$py.class
+build/
+dist/
+.pytest_cache
+
+# Secrets and Environment Variables
+.env
+.env.local
+.env.*
+!.env.example
+
+# IDE (VS Code)
+.vscode/
+*.swp
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# Machine Learning / Hugging Face (Ignore large model weights)
+*.safetensors
+*.pth
+*.pt
+*.h5
+*.onnx
+*.bin
+*.ckpt
+
+# Logs and Databases
+*.log
+*.sqlite3
