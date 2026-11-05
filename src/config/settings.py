@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 # declare AI model
 REMOTE_MODEL = "Qwen/Qwen3.8-27B"
@@ -9,8 +10,8 @@ LOCAL_MODEL = "HuggingFaceTB/SmolVLM-500M-Instruct"
 REMOTE_PROVIDER = "auto"
 
 # daily limits on remote model calls, our team's HF Token pays for them
-REMOTE_LIMIT_PER_IP = 20 # per visitor (IP address) per day
-REMOTE_LIMIT_TOTAL = 200 # for all visitors per day
+REMOTE_LIMIT_PER_IP = int(os.getenv("REMOTE_LIMIT_PER_IP", "20")) # per visitor (IP address) per day
+REMOTE_LIMIT_TOTAL = int(os.getenv("REMOTE_LIMIT_TOTAL", "200")) # for all visitors per day
 # keep the count outside repo folder so a redeploy won't reset them
 USAGE_DB_PATH = Path.home() / ".photo_critic" / "usage.db"
 

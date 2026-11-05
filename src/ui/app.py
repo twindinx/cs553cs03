@@ -139,6 +139,14 @@ with gr.Blocks(title="Photo Critique") as demo:
             critique_output,
         ],
     ).then(lambda: "", outputs=model_status)
+
+    api_photo = gr.File(visible=False)
+    gr.Button(visible=False).click(
+        fn = score_artwork,
+        inputs = [api_photo, aspect, temperature, top_p, use_local_model],
+        outputs = [critique_output, model_status],
+        api_name = "critique"
+    )
     demo.load()
 
 if __name__ == "__main__":

@@ -43,7 +43,9 @@ def fake_model(route_name, fail=False):
 
 
 @pytest.fixture
-def fakes(monkeypatch):
+def fakes(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "photo.jpg").write_bytes(b"x" * 100)
     monkeypatch.setattr(router, "get_token", lambda: "hf_team_token")
     monkeypatch.setattr(router, "local_critique", fake_model("Local"))
     monkeypatch.setattr(router, "remote_critique", fake_model("Remote"))
@@ -51,7 +53,7 @@ def fakes(monkeypatch):
 
 
 def visit(ip, use_local=False):
-    request = router.gr.Request(client={"host": ip})
+    request = router.gr.Request(client={"host": ip}, headers={})
     _, status = router.score_artwork("photo.jpg", "Composition", 0.0, 1.0, use_local, request)
     return status
 
@@ -81,3 +83,27 @@ def test_router_no_token_goes_local(fakes, monkeypatch):
 def test_router_no_photo(fakes):
     with pytest.raises(router.gr.Error):
         router.score_artwork(None, "Composition", 0.0, 1.0, False, router.gr.Request())
+
+def test_router_quota_per_visitor_behind_proxy(fakes):
+    def via_proxy(visitor):
+        request = router.gr.Request(client={"host": "172.30.19.20"}, headers={"X-Forwarded-For": f"{visitor}, 172.30.19.20"})
+        _, status = router.score_artwork("photo.jpg", "Composition", 0.0, 1.0, False, request)
+        return status
+    for _ in range(3):
+        via_proxy("203.0.113.7")
+    assert "Remote" in via_proxy("198.51.100.4")
+
+def test_failover_counted_under_the_model_that_answered(fakes):
+    # if daily limit is reached, the failover to local model should be counted under "local"
+    # and failover under reason="daily_limit"
+    from prometheus_client import REGISTRY
+    def value(name, **labels):
+        return REGISTRY.get_sample_value(name, labels) or 0
+    before = (value("photo_critic_requests_total", model="local", outcome="success"),
+              value("photo_critic_failovers_total", reason="daily_limit"))
+    for _ in range(4):
+        visit("1.1.1.1")
+    after = (value("photo_critic_requests_total", model="local", outcome="success"),
+             value("photo_critic_failovers_total", reason="daily_limit"))
+    # compare the change
+    assert (after[0] - before[0], after[1] - before[1]) == (1, 1)

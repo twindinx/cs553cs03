@@ -5,14 +5,15 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "accelerate>=1.15.0",
     "gradio[oauth]>=6.29.0",
     "huggingface-hub>=1.33.0",
     "pillow>=12.3.0",
-    "torch>=2.14.1",
-    "torchvision>=0.29.1",
-    "transformers>=5.18.0",
+    "prometheus-client>=0.26.0",
 ]
+
+[tool.uv]
+# uv sync on Mac install both groups while Dockers only install selected groups
+default-groups = ["dev", "local"]
 
 [tool.pyright]
 extraPaths = ["."]
@@ -29,4 +30,11 @@ explicit = true
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+]
+# only for the local model Docker
+local = [
+    "accelerate>=1.15.0",
+    "torch>=2.14.1",
+    "torchvision>=0.29.1",
+    "transformers>=5.18.0",
 ]
