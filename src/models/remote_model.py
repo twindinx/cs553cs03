@@ -11,13 +11,16 @@ from src.models.critique import Critique, parse_response
 
 REMOTE_SECONDS = Histogram(
     "photo_critic_remote_call_seconds", "Time waiting for the remote model",
-    buckets=(0.5, 1, 2, 5, 10, 30, 60, 120),
+    buckets=(0.5, 1, 2, 5, 10, 20, 30, 60, 120),
 )
 REMOTE_ERRORS = Counter(
     "photo_critic_remote_errors_total", "Failures calling the remote model",["error_type"]
 )
 REMOTE_TOKENS = Counter(
     "photo_critic_remote_tokens_total", "Tokens used by the remote model", ["kind"])
+# show both token lines as 0 from the start
+for kind in ("prompt", "completion"):
+    REMOTE_TOKENS.labels(kind=kind)
 MAX_IMAGE_SIDE = 768
 
 def image_as_data_url(image_path: str) -> str:
