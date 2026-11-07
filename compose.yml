@@ -60,7 +60,7 @@ services:
     image: ngrok/ngrok:latest
     container_name: g19-ngrok-app
     restart: unless-stopped
-    command: ["http", "g19-app:7860", "--url=https://${NGROK_APP_DOMAIN}"]
+    command: ["http", "g19-app:7860", "--url=https://${NGROK_APP_DOMAIN}", "--log=stdout"]
     environment:
       NGROK_AUTHTOKEN: ${NGROK_TOKEN_APP}
     depends_on: [app]
@@ -70,7 +70,7 @@ services:
     image: ngrok/ngrok:latest
     container_name: g19-ngrok-grafana
     restart: unless-stopped
-    command: ["http", "g19-grafana:3000", "--url=https://${NGROK_GRAFANA_DOMAIN}"]
+    command: ["http", "g19-grafana:3000", "--url=https://${NGROK_GRAFANA_DOMAIN}", "--log=stdout"]
     environment:
       NGROK_AUTHTOKEN: ${NGROK_TOKEN_GRAFANA}
     depends_on: [grafana]
