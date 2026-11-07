@@ -16,7 +16,7 @@ services:
       - "6886:7860"
       - "6887:8000"
       - "6888:9100"
-    mem_limit: 3g
+    mem_limit: 5g
     cpus: 2
     networks:
       net: {ipv4_address: 172.16.19.10 }
