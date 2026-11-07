@@ -10,7 +10,7 @@ services:
       HF_TOKEN: ${HF_TOKEN}
       REMOTE_LIMIT_PER_IP: ${REMOTE_LIMIT_PER_IP:-20}
     volumes:
-      - api-usage:/root/.photo-critic
+      - api-usage:/root/.photo_critic
       - hf-cache:/data/hf
     ports:
       - "6886:7860"
