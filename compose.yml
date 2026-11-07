@@ -1,0 +1,90 @@
+name: g19
+
+services:
+  app:
+    build: .
+    image: g19-photo-critic
+    container_name: g19-app
+    restart: unless-stopped
+    environment:
+      HF_TOKEN: ${HF_TOKEN}
+      REMOTE_LIMIT_PER_IP: ${REMOTE_LIMIT_PER_IP:-20}
+    volumes:
+      - api-usage:/root/.photo-critic
+      - hf-cache:/data/hf
+    ports:
+      - "6886:7860"
+      - "6887:8000"
+      - "6888:9100"
+    mem_limit: 3g
+    cpus: 2
+    networks:
+      net: {ipv4_address: 172.16.19.10 }
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: g19-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prom-data:/prometheus
+    ports:
+      - "127.0.0.1:6892:9090"
+    networks: [net]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: g19-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SERVER_ROOT_URL: https://${NGROK_GRAFANA_DOMAIN:-localhost}/
+    volumes:
+      - ./monitoring/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/grafana:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:6893:3000"
+    depends_on: [prometheus]
+    networks: [net]
+
+  ngrok-app:
+    image: ngrok/ngrok:latest
+    container_name: g19-ngrok-app
+    restart: unless-stopped
+    command: ["http", "g19-app:7860", "--url=https://${NGROK_APP_DOMAIN}"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_TOKEN_APP}
+    depends_on: [app]
+    networks: [net]
+
+  ngrok-grafana:
+    image: ngrok/ngrok:latest
+    container_name: g19-ngrok-grafana
+    restart: unless-stopped
+    command: ["http", "g19-grafana:3000", "--url=https://${NGROK_GRAFANA_DOMAIN}"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_TOKEN_GRAFANA}
+    depends_on: [grafana]
+    networks: [net]
+
+networks:
+  net:
+    name: g19-net
+    ipam:
+      config:
+        - subnet: 172.16.19.0/24
+
+volumes:
+  api-usage:
+  hf-cache:
+  prom-data:
+  grafana-data:

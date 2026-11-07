@@ -1,0 +1,22 @@
+# git
+*.git*
+
+# environment
+.env
+.venv
+.env.*
+
+# misc
+team_keys
+tests
+report
+scripts
+monitoring
+.vscode
+
+# cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache

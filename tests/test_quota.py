@@ -86,7 +86,7 @@ def test_router_no_photo(fakes):
 
 def test_router_quota_per_visitor_behind_proxy(fakes):
     def via_proxy(visitor):
-        request = router.gr.Request(client={"host": "172.30.19.20"}, headers={"X-Forwarded-For": f"{visitor}, 172.30.19.20"})
+        request = router.gr.Request(client={"host": "172.16.19.20"}, headers={"X-Forwarded-For": f"{visitor}, 172.16.19.20"})
         _, status = router.score_artwork("photo.jpg", "Composition", 0.0, 1.0, False, request)
         return status
     for _ in range(3):
