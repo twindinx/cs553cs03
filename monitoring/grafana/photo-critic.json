@@ -261,7 +261,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (le) (increase(photo_critic_scores_bucket{model=\"remote\"}[$__range]))",
+          "expr": "round(sum by (le) (increase(photo_critic_scores_bucket{model=\"remote\"}[$__range])))",
           "format": "heatmap",
           "legendFormat": "{{le}}",
           "range": true,
@@ -335,7 +335,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (le) (increase(photo_critic_scores_bucket{model=\"local\"}[$__range]))",
+          "expr": "round(sum by (le) (increase(photo_critic_scores_bucket{model=\"local\"}[$__range])))",
           "format": "heatmap",
           "legendFormat": "{{le}}",
           "range": true,
@@ -1478,5 +1478,5 @@
   "timezone": "browser",
   "title": "Photo Critic: Group 19",
   "uid": "e183abc9-c2c3-4c53-b5e5-68bb781edf68",
-  "version": 45
+  "version": 48
 }
